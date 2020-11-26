@@ -173,10 +173,10 @@
 
 			var last_ts = 0, cto = null, ex, ey;
 			this.element
-				.on("init.jstree loading.jstree ready.jstree", $.proxy(function () {
+				.on("init.jstree loading.jstree ready.jstree", function () {
 						this.get_container_ul().addClass('jstree-contextmenu');
-					}, this))
-				.on("contextmenu.jstree", ".jstree-anchor", $.proxy(function (e, data) {
+					}.bind(this))
+				.on("contextmenu.jstree", ".jstree-anchor", function (e, data) {
 						if (e.target.tagName.toLowerCase() === 'input') {
 							return;
 						}
@@ -191,13 +191,13 @@
 						if(!this.is_loading(e.currentTarget)) {
 							this.show_contextmenu(e.currentTarget, e.pageX, e.pageY, e);
 						}
-					}, this))
-				.on("click.jstree", ".jstree-anchor", $.proxy(function (e) {
+					}.bind(this))
+				.on("click.jstree", ".jstree-anchor", function (e) {
 						if(this._data.contextmenu.visible && (!last_ts || (+new Date()) - last_ts > 250)) { // work around safari & macOS ctrl+click
 							$.vakata.context.hide();
 						}
 						last_ts = 0;
-					}, this))
+					}.bind(this))
 				.on("touchstart.jstree", ".jstree-anchor", function (e) {
 						if(!e.originalEvent || !e.originalEvent.changedTouches || !e.originalEvent.changedTouches[0]) {
 							return;
@@ -241,10 +241,10 @@
 					});
 			}
 			*/
-			$(document).on("context_hide.vakata.jstree", $.proxy(function (e, data) {
+			$(document).on("context_hide.vakata.jstree", function (e, data) {
 				this._data.contextmenu.visible = false;
 				$(data.reference).removeClass('jstree-context');
-			}, this));
+			}.bind(this));
 		};
 		this.teardown = function () {
 			if(this._data.contextmenu.visible) {
@@ -281,10 +281,10 @@
 			}
 
 			i = s.items;
-			if($.isFunction(i)) {
-				i = i.call(this, obj, $.proxy(function (i) {
+			if(typeof i === "function") {
+				i = i.call(this, obj, function (i) {
 					this._show_contextmenu(obj, x, y, i);
-				}, this));
+				}.bind(this));
 			}
 			if($.isPlainObject(i)) {
 				this._show_contextmenu(obj, x, y, i);
@@ -304,11 +304,11 @@
 		this._show_contextmenu = function (obj, x, y, i) {
 			var d = this.get_node(obj, true),
 				a = d.children(".jstree-anchor");
-			$(document).one("context_show.vakata.jstree", $.proxy(function (e, data) {
+			$(document).one("context_show.vakata.jstree", function (e, data) {
 				var cls = 'jstree-contextmenu jstree-' + this.get_theme() + '-contextmenu';
 				$(data.element).addClass(cls);
 				a.addClass('jstree-context');
-			}, this));
+			}.bind(this));
 			this._data.contextmenu.visible = true;
 			$.vakata.context.show(a, { 'x' : x, 'y' : y }, i);
 			/**
@@ -354,7 +354,7 @@
 			},
 			_execute : function (i) {
 				i = vakata_context.items[i];
-				return i && (!i._disabled || ($.isFunction(i._disabled) && !i._disabled({ "item" : i, "reference" : vakata_context.reference, "element" : vakata_context.element }))) && i.action ? i.action.call(null, {
+				return i && (!i._disabled || (typeof i._disabled === "function" && !i._disabled({ "item" : i, "reference" : vakata_context.reference, "element" : vakata_context.element }))) && i.action ? i.action.call(null, {
 							"item"		: i,
 							"reference"	: vakata_context.reference,
 							"element"	: vakata_context.element,
@@ -382,7 +382,7 @@
 						str += "<"+"li class='vakata-context-separator'><"+"a href='#' " + ($.vakata.context.settings.icons ? '' : 'style="margin-left:0px;"') + ">&#160;<"+"/a><"+"/li>";
 					}
 					sep = false;
-					str += "<"+"li class='" + (val._class || "") + (val._disabled === true || ($.isFunction(val._disabled) && val._disabled({ "item" : val, "reference" : vakata_context.reference, "element" : vakata_context.element })) ? " vakata-contextmenu-disabled " : "") + "' "+(val.shortcut?" data-shortcut='"+val.shortcut+"' ":'')+">";
+					str += "<"+"li class='" + (val._class || "") + (val._disabled === true || (typeof val._disabled === "function" && val._disabled({ "item" : val, "reference" : vakata_context.reference, "element" : vakata_context.element })) ? " vakata-contextmenu-disabled " : "") + "' "+(val.shortcut?" data-shortcut='"+val.shortcut+"' ":'')+">";
 					str += "<"+"a href='#' rel='" + (vakata_context.items.length - 1) + "' " + (val.title ? "title='" + val.title + "'" : "") + ">";
 					if($.vakata.context.settings.icons) {
 						str += "<"+"i ";
@@ -392,7 +392,7 @@
 						}
 						str += "><"+"/i><"+"span class='vakata-contextmenu-sep'>&#160;<"+"/span>";
 					}
-					str += ($.isFunction(val.label) ? val.label({ "item" : i, "reference" : vakata_context.reference, "element" : vakata_context.element }) : val.label) + (val.shortcut?' <span class="vakata-contextmenu-shortcut vakata-contextmenu-shortcut-'+val.shortcut+'">'+ (val.shortcut_label || '') +'</span>':'') + "<"+"/a>";
+					str += (typeof val.label === "function" ? val.label({ "item" : i, "reference" : vakata_context.reference, "element" : vakata_context.element }) : val.label) + (val.shortcut?' <span class="vakata-contextmenu-shortcut vakata-contextmenu-shortcut-'+val.shortcut+'">'+ (val.shortcut_label || '') +'</span>':'') + "<"+"/a>";
 					if(val.submenu) {
 						tmp = $.vakata.context._parse(val.submenu, true);
 						if(tmp) { str += tmp; }
@@ -507,7 +507,7 @@
 					vakata_context.element
 						.css({ "left" : x, "top" : y })
 						.show()
-						.find('a').first().focus().parent().addClass("vakata-context-hover");
+						.find('a').first().trigger('focus').parent().addClass("vakata-context-hover");
 					vakata_context.is_visible = true;
 					/**
 					 * triggered on the document when the contextmenu is shown
@@ -523,7 +523,7 @@
 			},
 			hide : function () {
 				if(vakata_context.is_visible) {
-					vakata_context.element.hide().find("ul").hide().end().find(':focus').blur().end().detach();
+					vakata_context.element.hide().find("ul").hide().end().find(':focus').trigger('blur').end().detach();
 					vakata_context.is_visible = false;
 					/**
 					 * triggered on the document when the contextmenu is hidden
@@ -579,7 +579,7 @@
 					e.preventDefault();
 				//})
 				//.on("mouseup", "a", function (e) {
-					if(!$(this).blur().parent().hasClass("vakata-context-disabled") && $.vakata.context._execute($(this).attr("rel")) !== false) {
+					if(!$(this).trigger('blur').parent().hasClass("vakata-context-disabled") && $.vakata.context._execute($(this).attr("rel")) !== false) {
 						$.vakata.context.hide();
 					}
 				})
@@ -594,7 +594,7 @@
 								break;
 							case 37:
 								if(vakata_context.is_visible) {
-									vakata_context.element.find(".vakata-context-hover").last().closest("li").first().find("ul").hide().find(".vakata-context-hover").removeClass("vakata-context-hover").end().end().children('a').focus();
+									vakata_context.element.find(".vakata-context-hover").last().closest("li").first().find("ul").hide().find(".vakata-context-hover").removeClass("vakata-context-hover").end().end().children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -603,14 +603,14 @@
 								if(vakata_context.is_visible) {
 									o = vakata_context.element.find("ul:visible").addBack().last().children(".vakata-context-hover").removeClass("vakata-context-hover").prevAll("li:not(.vakata-context-separator)").first();
 									if(!o.length) { o = vakata_context.element.find("ul:visible").addBack().last().children("li:not(.vakata-context-separator)").last(); }
-									o.addClass("vakata-context-hover").children('a').focus();
+									o.addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
 								break;
 							case 39:
 								if(vakata_context.is_visible) {
-									vakata_context.element.find(".vakata-context-hover").last().children("ul").show().children("li:not(.vakata-context-separator)").removeClass("vakata-context-hover").first().addClass("vakata-context-hover").children('a').focus();
+									vakata_context.element.find(".vakata-context-hover").last().children("ul").show().children("li:not(.vakata-context-separator)").removeClass("vakata-context-hover").first().addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -619,7 +619,7 @@
 								if(vakata_context.is_visible) {
 									o = vakata_context.element.find("ul:visible").addBack().last().children(".vakata-context-hover").removeClass("vakata-context-hover").nextAll("li:not(.vakata-context-separator)").first();
 									if(!o.length) { o = vakata_context.element.find("ul:visible").addBack().last().children("li:not(.vakata-context-separator)").first(); }
-									o.addClass("vakata-context-hover").children('a').focus();
+									o.addClass("vakata-context-hover").children('a').trigger('focus');
 									e.stopImmediatePropagation();
 									e.preventDefault();
 								}
@@ -637,7 +637,7 @@
 					e.preventDefault();
 					var a = vakata_context.element.find('.vakata-contextmenu-shortcut-' + e.which).parent();
 					if(a.parent().not('.vakata-context-disabled')) {
-						a.click();
+						a.trigger('click');
 					}
 				});
 
