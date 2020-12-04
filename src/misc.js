@@ -302,7 +302,7 @@
 			var nd = obj.id === "#" ? this.settings.core.data : this._data.datamodel[obj.id].getChildren(function (nodes) {
 				this._datamodel(id, nodes, callback);
 			}.bind(this));
-			if(Array.isArray(nd)) {
+			if($.vakata.is_array(nd)) {
 				this._datamodel(id, nd, callback);
 			}
 		};
@@ -356,7 +356,7 @@
 		};
 		this.close_node = function (obj, animation) {
 			var t1, t2, t, d;
-			if(Array.isArray(obj)) {
+			if($.vakata.is_array(obj)) {
 				obj = obj.slice();
 				for(t1 = 0, t2 = obj.length; t1 < t2; t1++) {
 					this.close_node(obj[t1], animation);
@@ -568,7 +568,7 @@
                 }
 
                 this.load_node = function (obj, callback) {
-                        if(Array.isArray(obj)) {
+                        if($.vakata.is_array(obj)) {
                                 // FIXME: _load_nodes will not load nodes not presented in the tree
                                 this._load_nodes(obj.slice(), callback);
                                 return true;
